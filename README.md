@@ -17,9 +17,9 @@
 
 ## Permissions
 
-- **rewards.admin** -- for console commands and setreward chat command
-- **rewards.vip** -- for VIP multipliers
-- **rewards.showrewards** -- for the showrewards chat command
+- **rewards.admin** -- For console commands and `setreward` chat command
+- **rewards.showrewards** -- For the `showrewards` chat command
+- **rewards.vip** -- For VIP multipliers
 
 ## Chat Commands
 
