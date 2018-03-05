@@ -346,7 +346,7 @@ namespace Oxide.Plugins
             permission.RegisterPermission("rewards.vip", this);
             permission.RegisterPermission("rewards.showrewards", this);
 
-            storedData = Interface.Oxide.DataFileSystem.ReadObject<StoredData>(Title);
+            storedData = Interface.Oxide.DataFileSystem.ReadObject<StoredData>(Name);
 
             Loadcfg();
 
