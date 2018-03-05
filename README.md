@@ -31,7 +31,9 @@
 - **setreward `<reward name> <value>`** -- Sets rewards config and saves it
 - **showrewards** -- Shows current rewards config
 
-## Multipliers
+## Configuration
+
+### Multipliers
 
 If enabled from config, players will get different rewards based on the weapon used and/or the distance from which the player killed the victim.
 
@@ -47,6 +49,10 @@ If more than one multiplier is enabled, the total multiplier will be the product
 
 **Happy Hour:** Disable it for now because it doesn't work as it should
 
-## Friends and Clans
+### Friends and Clans
 
 If the respective options are enabled from config, the plugin checks if the victim is a *'Friend'* or is in the same *'Clan'* of the killer, if so, no reward is given to the killer. This was made to avoid friends abusing and killing each other. This can also be avoided by enabling the `TakeMoneyFromVictim` which takes money from victim and gives it to killer
+
+## Stored Data
+
+This plugin stores data in the `oxide/data/Rewards.json` file to keep track of welcome money given to players. This file should not be deleted in most cases unless you want players to be given welcome money again when they connect after a wipe.
