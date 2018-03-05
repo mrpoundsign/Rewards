@@ -514,14 +514,14 @@ namespace Oxide.Plugins
                 if (!isWelcomeReward)
                 {
                     SendChatMessage(player, reason == null ? Lang("ActivityReward", player.UserIDString, amount) : Lang("KillReward", player.UserIDString, amount, reason), Lang("Prefix"));
-                    LogToFile(Title, $"[{DateTime.Now}] " + player.displayName + " got " + amount + " for " + (reason == null ? "activity" : "killing " + reason), this);
+                    LogToFile(Name, $"[{DateTime.Now}] " + player.displayName + " got " + amount + " for " + (reason == null ? "activity" : "killing " + reason), this);
                     if (options.PrintToConsole)
                         Puts(player.displayName + " got " + amount + " for " + (reason == null ? "activity" : "killing " + reason));
                 }
                 else
                 {
                     SendChatMessage(player, Lang("WelcomeReward", player.UserIDString, amount), Lang("Prefix"));
-                    LogToFile(Title, $"[{DateTime.Now}] " + player.displayName + " got " + amount + " as a welcome reward", this);
+                    LogToFile(Name, $"[{DateTime.Now}] " + player.displayName + " got " + amount + " as a welcome reward", this);
                     if (options.PrintToConsole)
                         Puts(player.displayName + " got " + amount + " as a welcome reward");
                 }
@@ -572,7 +572,7 @@ namespace Oxide.Plugins
                     if (success) //Send message if transaction was successful
                     {
                         SendChatMessage(player, Lang("KillReward", player.UserIDString, rewardrates.human * multiplier, victim.displayName), Lang("Prefix"));
-                        LogToFile(Title, $"[{DateTime.Now}] " + player.displayName + " got " + rewardrates.human * multiplier + " for killing " + victim.displayName, this);
+                        LogToFile(Name, $"[{DateTime.Now}] " + player.displayName + " got " + rewardrates.human * multiplier + " for killing " + victim.displayName, this);
                         if (options.PrintToConsole)
                             Puts(player.displayName + " got " + rewardrates.human * multiplier + " for killing " + victim.displayName);
                     }
