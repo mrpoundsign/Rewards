@@ -1,4 +1,4 @@
-**Reward** rewards players with money *(using the Economics and/or Server Rewards plugin)* for killing animals, other players, entities, and activity.
+**Rewards** players with money *(using the Economics and/or Server Rewards plugin)* for killing animals, other players, entities, and activity.
 
 ## Dependencies
 
