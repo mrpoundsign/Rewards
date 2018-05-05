@@ -32,7 +32,7 @@ namespace Oxide.Plugins
         RewardRates rr; Multipliers m; Options o; Rewards_Version rv;//Strings str;
         public List<string> Options_itemList = new List<string> { "NPCReward_Enabled", "VIPMultiplier_Enabled", "ActivityReward_Enabled", "WelcomeMoney_Enabled", "WeaponMultiplier_Enabled", "DistanceMultiplier_Enabled", "UseEconomicsPlugin", "UseServerRewardsPlugin", "UseFriendsPlugin", "UseClansPlugin", "Economincs_TakeMoneyFromVictim", "ServerRewards_TakeMoneyFromVictim", "PrintToConsole", "HappyHour_Enabled" };
         public List<string> Multipliers_itemList = new List<string> { "LR300", "VIPMultiplier", "HuntingBow", "Crossbow", "AssaultRifle", "PumpShotgun", "SemiAutomaticRifle", "Thompson", "CustomSMG", "BoltActionRifle", "TimedExplosiveCharge", "M249", "EokaPistol", "Revolver", "WaterpipeShotgun", "SemiAutomaticPistol", "DoubleBarrelShotgun", "SatchelCharge", "distance_50", "distance_100", "distance_200", "distance_300", "distance_400", "HappyHourMultiplier", "M92Pistol", "MP5A4", "RocketLauncher", "BeancanGrenade", "F1Grenade", "Machete", "Longsword", "Mace", "SalvagedCleaver", "SalvagedSword", "StoneSpear", "WoodenSpear" };
-        public List<string> Rewards_itemList = new List<string> { "human", "bear", "wolf", "chicken", "horse", "boar", "stag", "helicopter", "autoturret", "ActivityRewardRate_minutes", "ActivityReward", "WelcomeMoney", "HappyHour_BeginHour", "HappyHour_DurationInHours", "HappyHour_EndHour", "NPCKill_Reward" };
+        public List<string> Rewards_itemList = new List<string> { "human", "bear", "wolf", "chicken", "horse", "boar", "stag", "helicopter", "scientist", "bradley", "autoturret", "ActivityRewardRate_minutes", "ActivityReward", "WelcomeMoney", "HappyHour_BeginHour", "HappyHour_DurationInHours", "HappyHour_EndHour", "NPCKill_Reward" };
         //public List<string> Strings_itemList = new List<string> { "CustomPermissionName" };
         //private Strings strings = new Strings();
         private Rewards_Version rewardsversion = new Rewards_Version();
@@ -95,6 +95,8 @@ namespace Oxide.Plugins
                 ["chicken"] = "a chicken",
                 ["autoturret"] = "an autoturret",
                 ["helicopter"] = "a helicopter",
+                ["scientist"] = "a scientist",
+                ["bradley"] = "a Bradley APC",
                 ["Prefix"] = "Rewards",
                 ["HappyHourStart"] = "Happy hour started",
                 ["HappyHourEnd"] = "Happy hour ended"
@@ -127,6 +129,8 @@ namespace Oxide.Plugins
                 boar = 15,
                 stag = 10,
                 helicopter = 250,
+                bradley = 150,
+                scientist = 50,
                 autoturret = 150,
                 ActivityRewardRate_minutes = 30,
                 ActivityReward = 25,
@@ -265,6 +269,8 @@ namespace Oxide.Plugins
                 rewardrates.boar = Convert.ToDouble(temp["boar"]);
                 rewardrates.chicken = Convert.ToDouble(temp["chicken"]);
                 rewardrates.helicopter = Convert.ToDouble(temp["helicopter"]);
+                rewardrates.scientist = Convert.ToDouble(temp["scientist"]);
+                rewardrates.bradley = Convert.ToDouble(temp["bradley"]);
                 rewardrates.horse = Convert.ToDouble(temp["horse"]);
                 rewardrates.human = Convert.ToDouble(temp["human"]);
                 rewardrates.stag = Convert.ToDouble(temp["stag"]);
@@ -453,20 +459,40 @@ namespace Oxide.Plugins
         {
             if (victim == null)
                 return;
-            if (info?.Initiator?.ToPlayer() == null)
+            if (info?.Initiator == null)
                 return;
+            if (info.Initiator is Scientist)
+                return;
+
+            var player = info.Initiator.ToPlayer();
+
+            if (player == null)
+                return;
+
             double totalmultiplier = 1;
 
             if (options.DistanceMultiplier_Enabled || options.WeaponMultiplier_Enabled)
-                totalmultiplier = (options.DistanceMultiplier_Enabled ? multipliers.GetDistanceM(victim.Distance2D(info?.Initiator?.ToPlayer())) : 1) * (options.WeaponMultiplier_Enabled ? multipliers.GetWeaponM(info?.Weapon?.GetItem()?.info?.displayName?.english) : 1) * (HappyHourActive ? multipliers.HappyHourMultiplier : 1) * ((options.VIPMultiplier_Enabled && HasPerm(info?.Initiator?.ToPlayer(), "rewards.vip")) ? multipliers.VIPMultiplier : 1) * ((HasPerm(info?.Initiator?.ToPlayer(), "rewards.vip")) ? multipliers.VIPMultiplier : 1);
+                totalmultiplier = (options.DistanceMultiplier_Enabled ? multipliers.GetDistanceM(victim.Distance2D(player)) : 1) * (options.WeaponMultiplier_Enabled ? multipliers.GetWeaponM(info?.Weapon?.GetItem()?.info?.displayName?.english) : 1) * (HappyHourActive ? multipliers.HappyHourMultiplier : 1) * ((options.VIPMultiplier_Enabled && HasPerm(info?.Initiator?.ToPlayer(), "rewards.vip")) ? multipliers.VIPMultiplier : 1) * ((HasPerm(player, "rewards.vip")) ? multipliers.VIPMultiplier : 1);
 
-            if (victim.ToPlayer() != null)
+            if (victim is Scientist)
+            {
+                RewardPlayer(player, rewardrates.scientist, totalmultiplier, Lang("scientist", player.UserIDString));
+            }
+            else if (victim is BaseHelicopter)
+            {
+                RewardPlayer(player, rewardrates.helicopter, totalmultiplier, Lang("helicopter", player.UserIDString));
+            }
+            else if (victim is BradleyAPC)
+            {
+                RewardPlayer(player, rewardrates.bradley, totalmultiplier, Lang("bradley", player.UserIDString));
+            }
+            else if (victim.ToPlayer() != null)
             {
                 if (victim.ToPlayer().userID <= 2147483647)
                     return;
-                else if (info?.Initiator?.ToPlayer().userID == victim.ToPlayer().userID)
+                else if (player.userID == victim.ToPlayer().userID)
                     return;
-                else { RewardForPlayerKill(info?.Initiator?.ToPlayer(), victim.ToPlayer(), totalmultiplier); return; }
+                else { RewardForPlayerKill(player, victim.ToPlayer(), totalmultiplier); return; }
             }
             else if (victim.name.Contains("assets/rust.ai/agents/"))
             {
@@ -488,17 +514,13 @@ namespace Oxide.Plugins
                         rewardmoney = rewardrates.chicken;
                     else
                         return;
-                    RewardPlayer(info?.Initiator?.ToPlayer(), rewardmoney, totalmultiplier, Lang(AnimalName, info?.Initiator?.ToPlayer().UserIDString));
+                    RewardPlayer(player, rewardmoney, totalmultiplier, Lang(AnimalName, player.UserIDString));
                 }
                 catch { }
             }
-            else if (victim.name.Contains("helicopter/patrolhelicopter.prefab"))
-            {
-                RewardPlayer(info?.Initiator?.ToPlayer(), rewardrates.helicopter, totalmultiplier, Lang("helicopter", info?.Initiator?.ToPlayer().UserIDString));
-            }
             else if (victim.name == "assets/prefabs/npc/autoturret/autoturret_deployed.prefab")
             {
-                RewardPlayer(info?.Initiator?.ToPlayer(), rewardrates.autoturret, totalmultiplier, Lang("autoturret", info?.Initiator?.ToPlayer().UserIDString));
+                RewardPlayer(player, rewardrates.autoturret, totalmultiplier, Lang("autoturret", player.UserIDString));
             }
         }
 
@@ -660,6 +682,8 @@ namespace Oxide.Plugins
             public double stag { get; set; }
             public double helicopter { get; set; }
             public double autoturret { get; set; }
+            public double scientist { get; set; }
+            public double bradley { get; set; }
             public double ActivityRewardRate_minutes { get; set; }
             public double ActivityReward { get; set; }
             public double WelcomeMoney { get; set; }
@@ -685,6 +709,10 @@ namespace Oxide.Plugins
                     return this.stag;
                 else if (itemName == "helicopter")
                     return this.helicopter;
+                else if (itemName == "scientist")
+                    return this.scientist;
+                else if (itemName == "bradley")
+                    return this.bradley;
                 else if (itemName == "autoturret")
                     return this.autoturret;
                 else if (itemName == "ActivityRewardRate_minutes")
