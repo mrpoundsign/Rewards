@@ -457,11 +457,13 @@ namespace Oxide.Plugins
 
         private void OnEntityDeath(BaseCombatEntity victim, HitInfo info)
         {
-            if (victim == null)
+            if (victim == null) // No victim
                 return;
-            if (info?.Initiator == null)
+            if (info?.Initiator == null) // No initiator
                 return;
-            if (info.Initiator is Scientist)
+            if (info.Initiator is Scientist) // Initiator is a Scientist
+                return;
+            if ((victim as BaseCorpse) != null) // Victim is a corpse (no double reward for harvesting)
                 return;
 
             var player = info.Initiator.ToPlayer();
